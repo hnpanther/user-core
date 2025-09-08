@@ -30,7 +30,7 @@ public class RoleCore {
     private Set<UserCore> users = new HashSet<>();
 
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE,  CascadeType.REFRESH})
     @JoinTable(
             name = "permission_role_core",
             joinColumns = @JoinColumn(name = "role_id"),

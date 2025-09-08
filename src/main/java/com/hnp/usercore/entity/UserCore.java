@@ -63,7 +63,7 @@ public class UserCore {
     @Column(nullable = false)
     private Short state;
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE,  CascadeType.REFRESH})
     @JoinTable(
             name = "user_role_core",
             joinColumns = @JoinColumn(name = "user_id"),

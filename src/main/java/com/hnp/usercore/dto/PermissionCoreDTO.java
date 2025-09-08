@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class PermissionDTO {
+public class PermissionCoreDTO {
 
     private Long id;
 
