@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 
 @Service
@@ -72,12 +73,82 @@ public class PermissionsServiceImpl implements PermissionCoreService {
     }
 
     @Override
-    public PermissionCoreDTO getPermissionById(Long id) {
-        return null;
+    public Optional<PermissionCoreDTO> getPermissionById(Long id) {
+        logger.info("===> getPermissionById {}", id);
+
+        if(id == null) {
+            logger.error("getPermissionById: id is null");
+            throw new InvalidPermissionDataException("id is null");
+        }
+
+        Optional<PermissionCoreDTO> permissionCoreDTOOptional = permissionCoreRepository.findById(id)
+                .map(permissionCoreMapper::toDTO);
+        if(permissionCoreDTOOptional.isPresent()) {
+            logger.info("getPermissionById={}: permissionCoreDTO is {}", id, permissionCoreDTOOptional.get());
+        } else {
+            logger.info("getPermissionById={}: permissionCoreDTO is null", id);
+        }
+        return permissionCoreDTOOptional;
+
     }
 
     @Override
-    public PermissionCoreDTO getPermissionByName(String name) {
-        return null;
+    public Optional<PermissionCoreDTO> getPermissionByName(String name) {
+        logger.info("===> getPermissionByName {}", name);
+        if(name == null || name.isBlank()) {
+            logger.error("getPermissionByName: name is empty or null");
+            throw new InvalidPermissionDataException("name is empty or null");
+        }
+
+        logger.info("===> getPermissionByName {}", name);
+        Optional<PermissionCoreDTO> permissionCoreDTOOptional = permissionCoreRepository.findByPermissionName(name)
+                .map(permissionCoreMapper::toDTO);
+        if(permissionCoreDTOOptional.isPresent()) {
+            logger.info("getPermissionByName={}: permissionCoreDTO is {}", name, permissionCoreDTOOptional.get());
+        } else {
+            logger.info("getPermissionByName={}: permissionCoreDTO is null", name);
+        }
+        return permissionCoreDTOOptional;
     }
+
+    @Override
+    public PermissionCoreDTO updatePermission(PermissionCoreDTO dto) {
+        logger.info("===> updatePermission {}", dto);
+        if(dto == null || dto.getId() == null) {
+            logger.error("updatePermission: dto is null");
+            throw new InvalidPermissionDataException("dto is null");
+        }
+
+        Optional<PermissionCore> permissionCoreOptional = getPermissionCoreById(dto.getId());
+
+        if(permissionCoreOptional.isEmpty()) {
+            logger.error("updatePermission: permissionCore is null");
+            throw new InvalidPermissionDataException("permissionCore is null, id=" + dto.getId());
+        }
+
+        PermissionCore permissionCore = permissionCoreOptional.get();
+
+        if(dto.getPermissionName() != null && !dto.getPermissionName().isBlank()) {
+            permissionCore.setPermissionName(dto.getPermissionName());
+        }
+
+        if(dto.getPermissionName() != null && !dto.getPermissionName().isBlank()) {
+            permissionCore.setPermissionName(dto.getPermissionName());
+        }
+
+        PermissionCore saved = permissionCoreRepository.save(permissionCore);
+
+        logger.info("updatePermission: saved {}", saved);
+
+        return permissionCoreMapper.toDTO(saved);
+    }
+
+
+
+    private Optional<PermissionCore> getPermissionCoreById(Long id) {
+        logger.info("===> getPermissionCoreById {}", id);
+        return permissionCoreRepository.findById(id);
+    }
+
+
 }
