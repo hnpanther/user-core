@@ -276,4 +276,49 @@ public class PermissionCoreServiceTest {
         assertFalse(permissionByName.isPresent());
     }
 
+
+    @Test
+    void testUpdatePermission_WithValidData_Success() {
+        Long id = 1L;
+        String permissionName = "READ_USER";
+        String description = "new description";
+
+        PermissionCore permissionCore = new PermissionCore();
+        permissionCore.setPermissionName(permissionName);
+        permissionCore.setId(id);
+        permissionCore.setDescription(description);
+
+        PermissionCoreDTO dto = new PermissionCoreDTO();
+        dto.setPermissionName(permissionName);
+        dto.setId(id);
+        dto.setDescription(description);
+
+        when(permissionCoreRepository.findById(id)).thenReturn(Optional.of(permissionCore));
+        when(permissionCoreRepository.save(any())).thenReturn(permissionCore);
+        when(permissionCoreMapper.toDTO(permissionCore)).thenReturn(dto);
+
+        PermissionCoreDTO savedReturn = permissionCoreService.updatePermission(dto);
+
+        assertNotNull(savedReturn);
+        assertEquals(description, savedReturn.getDescription());
+        assertEquals(id, savedReturn.getId());
+
+    }
+
+    @Test
+    void testUpdatePermission_WithInvalidData_Fail() {
+        Long id = 1L;
+        String permissionName = "READ_USER";
+        PermissionCoreDTO dto = new PermissionCoreDTO();
+        dto.setPermissionName(permissionName);
+        dto.setId(id);
+
+        when(permissionCoreRepository.findById(id)).thenReturn(Optional.empty());
+
+        assertThrows(
+                InvalidPermissionDataException.class,
+                () -> permissionCoreService.updatePermission(dto)
+        );
+    }
+
 }

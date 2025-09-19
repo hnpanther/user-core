@@ -132,8 +132,8 @@ public class PermissionsServiceImpl implements PermissionCoreService {
             permissionCore.setPermissionName(dto.getPermissionName());
         }
 
-        if(dto.getPermissionName() != null && !dto.getPermissionName().isBlank()) {
-            permissionCore.setPermissionName(dto.getPermissionName());
+        if(dto.getDescription() != null && !dto.getDescription().isBlank()) {
+            permissionCore.setDescription(dto.getDescription());
         }
 
         PermissionCore saved = permissionCoreRepository.save(permissionCore);
