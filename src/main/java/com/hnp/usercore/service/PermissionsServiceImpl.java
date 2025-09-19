@@ -2,8 +2,8 @@ package com.hnp.usercore.service;
 
 import com.hnp.usercore.dto.PermissionCoreDTO;
 import com.hnp.usercore.entity.PermissionCore;
-import com.hnp.usercore.exception.DuplicatePermissionException;
-import com.hnp.usercore.exception.InvalidPermissionDataException;
+import com.hnp.usercore.exception.DuplicateDataException;
+import com.hnp.usercore.exception.InvalidDataException;
 import com.hnp.usercore.mapper.PermissionCoreMapper;
 import com.hnp.usercore.repository.PermissionCoreRepository;
 import jakarta.transaction.Transactional;
@@ -11,9 +11,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -37,15 +36,15 @@ public class PermissionsServiceImpl implements PermissionCoreService {
         logger.info("===> createPermission with {}", dto);
         if(dto == null) {
             logger.error("createPermission: dto is null");
-            throw new InvalidPermissionDataException("PermissionCoreDTO is null");
+            throw new InvalidDataException("PermissionCoreDTO is null");
         }
         if(dto.getPermissionName() == null || dto.getPermissionName().isBlank()) {
             logger.error("===> createPermission: permissionName is null or empty");
-            throw new InvalidPermissionDataException("PermissionName is empty");
+            throw new InvalidDataException("PermissionName is empty");
         }
         if(permissionCoreRepository.existsByPermissionName(dto.getPermissionName())) {
             logger.error("===> createPermission: permissionName already exists: {}", dto.getPermissionName());
-            throw new DuplicatePermissionException("Permission with name '" + dto.getPermissionName() + "' already exists");
+            throw new DuplicateDataException("Permission with name '" + dto.getPermissionName() + "' already exists");
         }
 
 
@@ -63,7 +62,7 @@ public class PermissionsServiceImpl implements PermissionCoreService {
             try{
                 PermissionCoreDTO permission = createPermission(dto);
                 list.add(permission);
-            } catch (InvalidPermissionDataException | DuplicatePermissionException e) {
+            } catch (InvalidDataException | DuplicateDataException e) {
                 logger.error("createPermissions: invalid permission data: {}", e.getMessage());
             }
         }
@@ -78,7 +77,7 @@ public class PermissionsServiceImpl implements PermissionCoreService {
 
         if(id == null) {
             logger.error("getPermissionById: id is null");
-            throw new InvalidPermissionDataException("id is null");
+            throw new InvalidDataException("id is null");
         }
 
         Optional<PermissionCoreDTO> permissionCoreDTOOptional = permissionCoreRepository.findById(id)
@@ -97,7 +96,7 @@ public class PermissionsServiceImpl implements PermissionCoreService {
         logger.info("===> getPermissionByName {}", name);
         if(name == null || name.isBlank()) {
             logger.error("getPermissionByName: name is empty or null");
-            throw new InvalidPermissionDataException("name is empty or null");
+            throw new InvalidDataException("name is empty or null");
         }
 
         logger.info("===> getPermissionByName {}", name);
@@ -112,18 +111,33 @@ public class PermissionsServiceImpl implements PermissionCoreService {
     }
 
     @Override
+    public List<PermissionCoreDTO> getAllPermissions() {
+        List<PermissionCore> allPermission = permissionCoreRepository.findAll();
+        return allPermission.stream()
+                .map(permissionCoreMapper::toDTO).collect(Collectors.toList());
+
+    }
+
+    @Override
+    public Set<PermissionCore> findAllPermissionsByIds(Set<Long> ids) {
+        return new HashSet<>(permissionCoreRepository.findAllById(ids));
+    }
+
+
+
+    @Override
     public PermissionCoreDTO updatePermission(PermissionCoreDTO dto) {
         logger.info("===> updatePermission {}", dto);
         if(dto == null || dto.getId() == null) {
             logger.error("updatePermission: dto is null");
-            throw new InvalidPermissionDataException("dto is null");
+            throw new InvalidDataException("dto is null");
         }
 
         Optional<PermissionCore> permissionCoreOptional = getPermissionCoreById(dto.getId());
 
         if(permissionCoreOptional.isEmpty()) {
             logger.error("updatePermission: permissionCore is null");
-            throw new InvalidPermissionDataException("permissionCore is null, id=" + dto.getId());
+            throw new InvalidDataException("permissionCore is null, id=" + dto.getId());
         }
 
         PermissionCore permissionCore = permissionCoreOptional.get();

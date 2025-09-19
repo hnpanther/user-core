@@ -2,8 +2,8 @@ package com.hnp.usercore.service;
 
 import com.hnp.usercore.dto.PermissionCoreDTO;
 import com.hnp.usercore.entity.PermissionCore;
-import com.hnp.usercore.exception.DuplicatePermissionException;
-import com.hnp.usercore.exception.InvalidPermissionDataException;
+import com.hnp.usercore.exception.DuplicateDataException;
+import com.hnp.usercore.exception.InvalidDataException;
 import com.hnp.usercore.mapper.PermissionCoreMapper;
 import com.hnp.usercore.repository.PermissionCoreRepository;
 import org.junit.jupiter.api.Test;
@@ -84,7 +84,7 @@ public class PermissionCoreServiceTest {
         dto.setPermissionName(permissionName);
 
         assertThrows(
-                InvalidPermissionDataException.class,
+                InvalidDataException.class,
                 () -> permissionCoreService.createPermission(dto)
         );
         verify(permissionCoreRepository, never()).save(any(PermissionCore.class));
@@ -99,7 +99,7 @@ public class PermissionCoreServiceTest {
         when(permissionCoreRepository.existsByPermissionName(dto.getPermissionName())).thenReturn(true);
 
         assertThrows(
-                DuplicatePermissionException.class,
+                DuplicateDataException.class,
                 () -> permissionCoreService.createPermission(dto)
         );
         verify(permissionCoreRepository, never()).save(any(PermissionCore.class));
@@ -217,7 +217,7 @@ public class PermissionCoreServiceTest {
         Long id = null;
 
         assertThrows(
-                InvalidPermissionDataException.class,
+                InvalidDataException.class,
                 () -> permissionCoreService.getPermissionById(id)
         );
         verify(permissionCoreRepository, never()).findById(any());
@@ -261,7 +261,7 @@ public class PermissionCoreServiceTest {
         String permissionName = " ";
 
         assertThrows(
-                InvalidPermissionDataException.class,
+                InvalidDataException.class,
                 () -> permissionCoreService.getPermissionByName(permissionName)
         );
     }
@@ -316,7 +316,7 @@ public class PermissionCoreServiceTest {
         when(permissionCoreRepository.findById(id)).thenReturn(Optional.empty());
 
         assertThrows(
-                InvalidPermissionDataException.class,
+                InvalidDataException.class,
                 () -> permissionCoreService.updatePermission(dto)
         );
     }
